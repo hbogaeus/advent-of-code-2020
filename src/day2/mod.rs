@@ -38,13 +38,8 @@ fn count_valid_passwords_two(input: Vec<String>) -> i32 {
 fn validate_password_two(entry: &DatabaseEntry) -> bool {
   let low_match = entry.password.chars().nth((entry.low - 1) as usize).unwrap() == entry.lookup;
   let high_match = entry.password.chars().nth((entry.high - 1) as usize).unwrap() == entry.lookup;
-
-  match (low_match, high_match) {
-    (true, true) => false,
-    (false, false) => false,
-    _ => true
-  }
-
+  
+  low_match ^ high_match
 }
 
 fn parse_line(input: &str) -> DatabaseEntry {
