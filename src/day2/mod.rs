@@ -28,6 +28,25 @@ fn validate_password(entry: &DatabaseEntry) -> bool {
   return counter >= entry.low && counter <= entry.high;
 }
 
+fn count_valid_passwords_two(input: Vec<String>) -> i32 {
+  input.iter()
+    .map(|x| parse_line(x))
+    .filter(|x| validate_password_two(x))
+    .count() as i32
+}
+
+fn validate_password_two(entry: &DatabaseEntry) -> bool {
+  let low_match = entry.password.chars().nth((entry.low - 1) as usize).unwrap() == entry.lookup;
+  let high_match = entry.password.chars().nth((entry.high - 1) as usize).unwrap() == entry.lookup;
+
+  match (low_match, high_match) {
+    (true, true) => false,
+    (false, false) => false,
+    _ => true
+  }
+
+}
+
 fn parse_line(input: &str) -> DatabaseEntry {
   let re = Regex::new(r"^(?P<low>\d+)-(?P<high>\d+)\s(?P<lookup>[a-z]): (?P<password>\w+)$").unwrap();
   let captures = re.captures(input).expect("Bad capture?");
@@ -89,6 +108,20 @@ mod tests {
   fn first_problem_test_input() {
     let input = read_str("src/day2/input.txt");
     let result = count_valid_passwords(input);
+    println!("{}", result)
+  }
+
+  #[test]
+  fn second_problem_test() {
+    let input = DatabaseEntry { low: 1, high: 3, lookup: 'a', password: "abcde" };
+    let actual = validate_password_two(&input);
+    assert_eq!(actual, true)
+  }
+
+  #[test]
+  fn second_problem_test_input() {
+    let input = read_str("src/day2/input.txt");
+    let result = count_valid_passwords_two(input);
     println!("{}", result)
   }
 }
