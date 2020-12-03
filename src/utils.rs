@@ -18,3 +18,20 @@ pub fn read_integers(filename: &str) -> Vec<i32> {
 
   v
 }
+
+pub fn read_str(filename: &str) -> Vec<String> {
+  let file = File::open(filename).expect("File not found");
+  let br = BufReader::new(file);
+
+  let mut v: Vec<String> = Vec::new();
+
+  for line in br.lines() {
+    let line = line.expect("Broken line");
+
+    let n = line.trim();
+
+    v.push(n.to_string());
+  }
+
+  v
+}
