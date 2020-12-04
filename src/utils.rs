@@ -1,37 +1,26 @@
 use std::{fs::File, io::{BufRead, BufReader}};
 
-pub fn read_integers(filename: &str) -> Vec<i32> {
+fn read_from_file<F, T>(filename: &str, f: F) -> Vec<T>  where F: Fn(&str) -> T {
   let file = File::open(filename).expect("File not found");
   let br = BufReader::new(file);
 
-  let mut v: Vec<i32> = Vec::new();
+  let mut v: Vec<T> = Vec::new();
 
   for line in br.lines() {
     let line = line.expect("Broken line");
 
-    let n: i32  = line.trim()
-      .parse()
-      .expect("not a number");
+    let value = f(line.trim());
 
-    v.push(n);
+    v.push(value);
   }
 
   v
 }
 
+pub fn read_integers(filename: &str) -> Vec<i32> {
+  read_from_file(filename, |x| x.parse().expect("Bad number"))
+}
+
 pub fn read_str(filename: &str) -> Vec<String> {
-  let file = File::open(filename).expect("File not found");
-  let br = BufReader::new(file);
-
-  let mut v: Vec<String> = Vec::new();
-
-  for line in br.lines() {
-    let line = line.expect("Broken line");
-
-    let n = line.trim();
-
-    v.push(n.to_string());
-  }
-
-  v
+  read_from_file(filename, |x| x.to_string())
 }
