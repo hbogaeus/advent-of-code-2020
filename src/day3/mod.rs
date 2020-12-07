@@ -1,5 +1,3 @@
-use crate::utils::print_grid;
-
 struct Slope {
     x: usize,
     y: usize,
