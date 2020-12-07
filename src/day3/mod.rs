@@ -1,59 +1,137 @@
-use ndarray::Array2;
-
 use crate::utils::print_grid;
 
-fn travel(input: Vec<&str>) {
-  let height = input.len();
-  let width = input[0].len();
+struct Slope {
+    x: usize,
+    y: usize,
+}
 
-  let mut grid = Array2::from_elem((width, height), ' ');
+fn count_trees_multi_slopes(input: &Vec<String>, slopes: Vec<Slope>) -> i64 {
+    slopes
+        .iter()
+        .map(|slope| count_trees(&input, slope))
+        .map(|value| {
+            println!("{}", value);
+            value as i64
+        })
+        .product()
+}
 
-  for x in input {
-    for (index, y) in x.chars().enumerate() {
-      grid[[]]
+fn count_trees(input: &Vec<String>, slope: &Slope) -> i32 {
+    let height = input.len();
+    let width = input[0].len();
+
+    let mut grid: Vec<Vec<char>> = Vec::new();
+
+    for x in input.iter() {
+        let mut row = Vec::new();
+
+        for c in x.chars() {
+            row.push(c);
+        }
+        grid.push(row);
     }
-  }
 
-  let mut x = 0;
-  let mut y = 0;
+    let mut x = slope.x;
+    let mut y = slope.y;
 
-  let mut tree_count = 0;
+    let mut tree_count = 0;
 
-  print_grid(grid);
+    while y < height {
+        let square = grid[y][x];
 
-  while y < height {
-    let square = grid[x][y];
+        if square == '#' {
+            tree_count += 1;
+            grid[y][x] = 'X';
+        } else {
+            grid[y][x] = 'O';
+        }
 
-    if grid[x][y] == Square::Tree {
-      tree_count += 1;
+        x = (x + slope.x) % width;
+        y = y + slope.y;
     }
 
-    x = x + 1;
-    y = y + 3;
-  }
-
+    tree_count
 }
 
 #[cfg(test)]
 mod tests {
-  use super::*;
+    use std::vec;
 
-  #[test]
-  fn testing() {
-    let input = vec![
-      "..##.......",
-      "#...#...#..",
-      ".#....#..#.",
-      "..#.#...#.#",
-      ".#...##..#.",
-      "..#.##.....",
-      ".#.#.#....#",
-      ".#........#",
-      "#.##...#...",
-      "#...##....#",
-      ".#..#...#.#"
-    ];
+    use crate::utils::read_str;
 
-    travel(input)
-  }
+    use super::*;
+
+    #[test]
+    fn first_problem_test() {
+        let input = vec![
+            "..##.......".into(),
+            "#...#...#..".into(),
+            ".#....#..#.".into(),
+            "..#.#...#.#".into(),
+            ".#...##..#.".into(),
+            "..#.##.....".into(),
+            ".#.#.#....#".into(),
+            ".#........#".into(),
+            "#.##...#...".into(),
+            "#...##....#".into(),
+            ".#..#...#.#".into(),
+        ];
+
+        let count = count_trees(&input, &Slope { x: 3, y: 1 });
+
+        assert_eq!(count, 7);
+    }
+
+    #[test]
+    fn first_problem_test_input() {
+        let input = read_str("src/day3/input.txt");
+        let count = count_trees(&input, &Slope { x: 3, y: 1 });
+
+        println!("{}", count);
+    }
+
+    #[test]
+    fn second_problem_test() {
+        let input: Vec<String> = vec![
+            "..##.......".into(),
+            "#...#...#..".into(),
+            ".#....#..#.".into(),
+            "..#.#...#.#".into(),
+            ".#...##..#.".into(),
+            "..#.##.....".into(),
+            ".#.#.#....#".into(),
+            ".#........#".into(),
+            "#.##...#...".into(),
+            "#...##....#".into(),
+            ".#..#...#.#".into(),
+        ];
+
+        let slopes = vec![
+            Slope { x: 1, y: 1 },
+            Slope { x: 3, y: 1 },
+            Slope { x: 5, y: 1 },
+            Slope { x: 7, y: 1 },
+            Slope { x: 1, y: 2 },
+        ];
+
+        let count = count_trees_multi_slopes(&input, slopes);
+
+        assert_eq!(count, 336);
+    }
+
+    #[test]
+    fn second_problem_test_input() {
+        let input = read_str("src/day3/input.txt");
+
+        let slopes = vec![
+            Slope { x: 1, y: 1 },
+            Slope { x: 3, y: 1 },
+            Slope { x: 5, y: 1 },
+            Slope { x: 7, y: 1 },
+            Slope { x: 1, y: 2 },
+        ];
+
+        let count = count_trees_multi_slopes(&input, slopes);
+        println!("{}", count)
+    }
 }
