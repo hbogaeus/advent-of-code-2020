@@ -1,16 +1,49 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, ops::RangeInclusive};
 
 use regex::Regex;
 
-fn solve(input: String) {
-    let raw_passports = splits(&input);
-
-    for raw in raw_passports {
-        parse_passport(&raw)
-    }
+fn solve(input: String) -> i32 {
+    splits(&input)
+        .iter()
+        .map(parse_passport)
+        .filter(validate_passport)
+        .count() as i32
 }
 
-fn validate_passport(map: HashMap<&str, &str>) -> bool {}
+fn validate_passport(map: &HashMap<&str, &str>) -> bool {
+    let required_fields: Vec<&str> = vec![
+        "byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid",
+        // "cid"
+    ];
+
+    required_fields.iter().all(|&field| validate_field(map, field))
+}
+
+fn validate_field(map: &HashMap<&str, &str>, field: &str) -> bool {
+    if !map.contains_key(field) {
+        return false;
+    }
+
+    let value = map.get(field).expect("blah");
+
+    match field {
+        "byr" => {
+            let parsed: i32 = value.parse().expect("Not a number");
+            (1920..=2002).contains(&parsed)
+        },
+        "iyr" => {
+            let parsed: i32 = value.parse().expect("Not a number");
+            
+            parsed >= 2020 && parsed <= 2002
+        },
+        "eyr" => true,
+        "hgt" => true,
+        "hcl" => true,
+        "ecl" => true,
+        "pid" => true,
+        _ => false
+    }
+}
 
 fn parse_passport(input: &String) -> HashMap<&str, &str> {
     let re = Regex::new(r"(?P<key>[a-z]{3}):(?P<value>[\S]*)\b").unwrap();
@@ -34,6 +67,8 @@ fn splits(input: &String) -> Vec<String> {
 
 #[cfg(test)]
 mod tests {
+    use std::fs::read_to_string;
+
     use super::*;
 
     #[test]
@@ -52,6 +87,15 @@ hgt:179cm
 hcl:#cfa07d eyr:2025 pid:166559648
 iyr:2011 ecl:brn hgt:59in"
             .into();
-        solve(input);
+        let result = solve(input);
+        assert_eq!(result, 2)
+    }
+
+    #[test]
+    fn first_problem_test_input() {
+        let input = read_to_string("src/day4/input.txt").expect("Couldnt read file");
+        let result = solve(input);
+
+        println!("{}", result);
     }
 }
